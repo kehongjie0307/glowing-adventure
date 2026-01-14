@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM Nexus V2.2 - 深度生产力版</title>
+    <title>PM Nexus V2.3 - 滚动优化版</title>
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -29,9 +29,13 @@
             justify-content: center; border-radius: 8px; font-size: 18px; letter-spacing: 1px;
         }
         .site-layout .site-layout-background { background: #fff; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        
+        /* --- 滚动条优化样式 --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; } /* 颜色加深，圆角 */
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; } /* 悬停加深 */
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        
         .card-hover-effect:hover { transform: translateY(-2px); transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
         /* 手机外壳 */
@@ -196,9 +200,8 @@
             );
         };
 
-        // 3. Competitor Analysis (竞品分析) - 保持 V2.1
+        // 3. Competitor Analysis (竞品分析)
         const CompetitorAnalysis = () => {
-            // ... (代码与 V2.1 相同，点击 AI 解析生成 SWOT 和表格，可编辑下载)
             const [inputVal, setInputVal] = useState('');
             const [loading, setLoading] = useState(false);
             const [result, setResult] = useState(null);
@@ -346,7 +349,7 @@
             );
         };
 
-        // 5. User Journey (用户旅程) - 商城版完善 (增加表格)
+        // 5. User Journey (用户旅程)
         const UserJourney = () => {
             const journeyTable = [
                 { stage: '发现', action: '搜索商品/点击广告', touch: '搜索框/Banner', emotion: '期待 (4)', pain: '广告过多', opp: '精准推荐' },
@@ -372,7 +375,7 @@
                             <Step title="履约" description="收货/评价" icon={<CheckCircleOutlined />} />
                         </Steps>
                         <div className="relative h-64 w-[1000px] border-l border-b border-gray-200 bg-gray-50 rounded-br-lg mb-8">
-                            {/* 泳道示意 (省略部分代码，与V2.1一致) */}
+                            {/* 泳道示意 */}
                             <div className="absolute top-0 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">行为</div>
                             <div className="absolute top-1/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">接触点</div>
                             <div className="absolute top-2/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">情绪</div>
@@ -704,7 +707,7 @@
                     case 'meeting': return <MeetingNotes />;
                     case 'competitor': return <CompetitorAnalysis />;
                     case 'journey': return <UserJourney />;
-                    case 'charts': return <ThreeDiagramsGenerator />;
+                    case 'charts': return <ThreeDiagramsGenerator />; 
                     case 'prd': return <IntelligentPRD />;
                     case 'prototype': return <ProductionCenter mode="prototype" />;
                     case 'demo': return <ProductionCenter mode="demo" />;
@@ -750,7 +753,7 @@
                                 </div>
                             </div>
                         </Header>
-                        <Content className="m-4 md:m-6 overflow-hidden flex flex-col h-[calc(100vh-140px)]">
+                        <Content className="m-4 md:m-6 overflow-auto h-[calc(100vh-140px)]">
                             {renderContent()}
                         </Content>
                     </Layout>
