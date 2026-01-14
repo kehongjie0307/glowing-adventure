@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM Nexus V2.3 - 滚动优化版</title>
+    <title>PM Nexus V2.8 - 视觉校准版</title>
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -30,28 +30,65 @@
         }
         .site-layout .site-layout-background { background: #fff; }
         
-        /* --- 滚动条优化样式 --- */
+        /* 滚动条优化 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; } /* 颜色加深，圆角 */
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; } /* 悬停加深 */
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         
         .card-hover-effect:hover { transform: translateY(-2px); transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 手机外壳 */
+        /* 手机外壳 (V2.8: 标准 iPhone 比例 375x812) */
         .iphone-mockup {
-            border: 14px solid #333; border-radius: 30px; overflow: hidden; position: relative; background: #fff; width: 300px; height: 600px; margin: 0 auto;
+            border: 12px solid #333; border-radius: 40px; overflow: hidden; position: relative; background: #fff; 
+            width: 375px; height: 812px; /* 标准尺寸 */
+            margin: 0 auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.85); /* 整体微缩以适应屏幕 */
+            transform-origin: top center;
         }
-        .iphone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 20px; background: #333; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; z-index: 10; }
+        .iphone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 160px; height: 28px; background: #333; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 10; }
         
-        /* 浏览器外壳 */
+        /* 浏览器外壳 (V2.8: 16:10 比例适配) */
         .browser-mockup {
-            border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #fff; width: 100%; height: 500px; display: flex; flex-direction: column;
+            border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #fff; 
+            width: 100%; max-width: 960px; /* 限制外壳最大宽度 */
+            height: 625px; /* 900px * 0.65 + header */
+            display: flex; flex-direction: column; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            margin: 0 auto;
         }
-        .browser-header {
-            height: 40px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 16px; gap: 8px;
-        }
+        .browser-header { height: 40px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 16px; gap: 8px; flex-shrink: 0; }
         .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+        
+        /* Web 内容缩放容器 (V2.8: 1440x900 标准桌面分辨率) */
+        .web-content-scale-wrapper {
+            width: 1440px;
+            height: 900px; 
+            transform: scale(0.65); /* 缩放适配 */
+            transform-origin: top left;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+
+        /* 演示动画关键帧 */
+        @keyframes scrollUp {
+            0% { transform: translateY(0); }
+            20% { transform: translateY(0); } 
+            100% { transform: translateY(-50%); } 
+        }
+        .animate-scroll-content {
+            animation: scrollUp 10s linear infinite alternate;
+        }
+        
+        /* 甘特图样式 */
+        .gantt-bar { height: 24px; border-radius: 4px; position: relative; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 12px; font-weight: bold; }
+        .gantt-bar:hover { filter: brightness(0.9); transform: scaleY(1.1); z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        /* 详细甘特图样式 */
+        .detail-gantt-row { display: flex; border-bottom: 1px solid #f0f0f0; padding: 12px 0; align-items: center; }
+        .detail-gantt-label { width: 120px; font-weight: bold; color: #555; padding-left: 10px; }
+        .detail-gantt-chart { flex: 1; position: relative; height: 40px; background: #fafafa; border-radius: 4px; margin-right: 10px; }
+        .detail-gantt-bar-plan { position: absolute; height: 12px; top: 8px; background-color: #d9d9d9; border-radius: 2px; }
+        .detail-gantt-bar-actual { position: absolute; height: 12px; bottom: 8px; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -80,48 +117,63 @@
             PieChartOutlined, EditOutlined, DownloadOutlined, EyeOutlined, SaveOutlined,
             AudioOutlined, StopOutlined, SyncOutlined, DatabaseOutlined, ShopOutlined,
             ShoppingCartOutlined, CreditCardOutlined, UserSwitchOutlined, LaptopOutlined,
-            HistoryOutlined
+            HistoryOutlined, SendOutlined, PauseOutlined, CompassOutlined,
+            UndoOutlined, RedoOutlined, ScissorOutlined, CopyOutlined,
+            ScheduleOutlined, FileZipOutlined, FolderViewOutlined, SelectOutlined
         } = icons;
 
         const { useState, useEffect, useRef } = React;
 
         // ================= 子页面组件 =================
 
-        // 1. Dashboard (工作台) - 保持 V1.7
+        // 1. Dashboard (工作台) - V2.6 (保留)
         const Dashboard = () => {
-            const projectsData = {
-                'mall': [
-                    { title: '立项调研', status: '已完成', date: '05-01', desc: '市场/竞品分析完成', icon: <SearchOutlined />, color: 'green' },
-                    { title: 'PRD 评审', status: '已完成', date: '05-15', desc: 'V1.0 版本评审通过', icon: <FileTextOutlined />, color: 'green' },
-                    { title: 'UI 设计', status: '进行中', date: '05-25', desc: '主视觉设计中 (80%)', icon: <PictureOutlined />, color: 'purple' }, 
-                    { title: '开发迭代', status: '待开始', date: '预计 06-10', desc: 'Sprint 1 待启动', icon: <CodeOutlined />, color: 'gray' },
-                    { title: '灰度发布', status: '待开始', date: '预计 06-30', desc: '目标用户灰度测试', icon: <RocketOutlined />, color: 'gray' },
-                ]
-            };
             const [currentProject, setCurrentProject] = useState('mall');
-            
+            const [chatInput, setChatInput] = useState('');
+            const [chatHistory, setChatHistory] = useState([
+                { role: 'ai', content: '你好，我是 Nexus AI。2026年新项目已启动，有什么需要协助的吗？' }
+            ]);
+
+            const handleSendChat = () => {
+                if(!chatInput.trim()) return;
+                const newHistory = [...chatHistory, { role: 'user', content: chatInput }];
+                setChatHistory(newHistory);
+                setChatInput('');
+                setTimeout(() => {
+                    setChatHistory([...newHistory, { role: 'user', content: chatInput }, { role: 'ai', content: '收到，正在为您分析项目数据...' }]);
+                }, 1000);
+            };
+
+            const ganttData = [
+                { task: '立项调研', start: 0, duration: 15, color: 'bg-green-500', user: 'Alex', label: '1月 上' },
+                { task: 'PRD 撰写', start: 15, duration: 20, color: 'bg-blue-500', user: 'Alex', label: '1月 下' },
+                { task: 'UI 设计', start: 35, duration: 25, color: 'bg-purple-500', user: 'Sarah', label: '2月' },
+                { task: '技术开发', start: 60, duration: 30, color: 'bg-gray-400', user: 'Mike', label: '3月' },
+                { task: '测试验收', start: 90, duration: 10, color: 'bg-gray-400', user: 'QA', label: '4月' },
+            ];
+
             return (
                 <div className="space-y-6 animate-fade-in">
                     <Row gutter={16}>
-                        <Col span={6}><Card className="shadow-sm card-hover-effect"><Statistic title="项目总进度" value={68} suffix="%" prefix={<RocketOutlined className="text-blue-500"/>} /><Progress percent={68} strokeColor="#3b82f6" showInfo={false} size="small" className="mt-2"/></Card></Col>
+                        <Col span={6}><Card className="shadow-sm card-hover-effect"><Statistic title="项目总进度" value={35} suffix="%" prefix={<RocketOutlined className="text-blue-500"/>} /><Progress percent={35} strokeColor="#3b82f6" showInfo={false} size="small" className="mt-2"/></Card></Col>
                         <Col span={6}><Card className="shadow-sm card-hover-effect"><Statistic title="本周产出物" value={12} prefix={<FileTextOutlined className="text-green-500"/>} /><div className="text-xs text-gray-400 mt-2">较上周 +15%</div></Card></Col>
                         <Col span={6}><Card className="shadow-sm card-hover-effect"><Statistic title="待评审需求" value={5} prefix={<TeamOutlined className="text-orange-500"/>} /><div className="text-xs text-gray-400 mt-2">其中 2 个 P0 级</div></Card></Col>
-                        <Col span={6}><Card className="shadow-sm card-hover-effect bg-gradient-to-r from-purple-500 to-indigo-600 text-white"><Statistic title={<span className="text-white">AI 提效节省</span>} value={45} suffix="h" valueStyle={{color:'white'}} prefix={<RobotOutlined className="text-white"/>} /></Card></Col>
+                        <Col span={6}>
+                            <Card className="shadow-sm card-hover-effect h-32 relative overflow-hidden" bodyStyle={{padding: '10px 12px', height: '100%', display:'flex', flexDirection:'column'}}>
+                                <div className="font-bold text-indigo-600 mb-1 flex justify-between items-center text-xs"><span><RobotOutlined /> AI 助手</span><Tag color="blue" className="mr-0 scale-75">Online</Tag></div>
+                                <div className="flex-1 bg-gray-50 rounded p-2 text-xs text-gray-600 overflow-y-auto mb-1 scrollbar-hide space-y-2">{chatHistory.map((msg, idx) => (<div key={idx} className={msg.role === 'user' ? 'text-right' : 'text-left'}><span className={`inline-block px-2 py-1 rounded ${msg.role === 'user' ? 'bg-indigo-100 text-indigo-800' : 'bg-white border text-gray-700'}`}>{msg.content}</span></div>))}</div>
+                                <Input size="small" placeholder="输入指令..." suffix={<SendOutlined className="cursor-pointer text-indigo-500" onClick={handleSendChat}/>} value={chatInput} onChange={e=>setChatInput(e.target.value)} onPressEnter={handleSendChat} className="text-xs" />
+                            </Card>
+                        </Col>
                     </Row>
+
                     <Row gutter={16}>
                         <Col span={16}>
-                            <Card title="项目全景进度" extra={<Select defaultValue="mall" bordered={false} onChange={setCurrentProject}><Option value="mall">商城重构</Option></Select>} className="h-full shadow-sm">
-                                <div className="space-y-4">
-                                    {projectsData[currentProject || 'mall'].map((item,i)=>(
-                                        <div key={i} className="flex items-center p-3 border rounded-lg">
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-4 bg-${item.color}-50 text-${item.color}-500`}>{item.icon}</div>
-                                            <div className="flex-1">
-                                                <div className="font-bold text-sm">{item.title} <Tag className="ml-2 scale-90">{item.status}</Tag></div>
-                                                <div className="text-xs text-gray-500">{item.desc}</div>
-                                            </div>
-                                            <div className="text-xs font-mono bg-gray-100 px-2 rounded">{item.date}</div>
-                                        </div>
-                                    ))}
+                            <Card title="项目全景进度 (2026 上半年)" extra={<Select defaultValue="mall" bordered={false} onChange={setCurrentProject}><Option value="mall">商城重构</Option></Select>} className="h-full shadow-sm">
+                                <div className="relative pt-6 pb-2 px-2">
+                                    <div className="flex justify-between text-xs text-gray-400 border-b border-gray-100 pb-2 mb-4 font-mono"><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span></div>
+                                    <div className="space-y-4">{ganttData.map((item, index) => (<div key={index} className="flex items-center group"><div className="w-20 text-xs font-bold text-gray-600 truncate mr-2">{item.task}</div><div className="flex-1 h-6 bg-gray-50 rounded relative overflow-hidden"><Tooltip title={`${item.task}: ${item.user}`}><div className={`gantt-bar absolute top-0 bottom-0 ${item.color} shadow-sm`} style={{ left: `${item.start}%`, width: `${item.duration}%` }}>{item.user}</div></Tooltip></div></div>))}</div>
+                                    <div className="absolute top-8 bottom-0 w-px bg-red-400 border-l border-dashed border-red-400 z-10" style={{left: '38%'}}><div className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full"></div><div className="absolute top-0 left-1 text-[10px] text-red-500 bg-white px-1">Today</div></div>
                                 </div>
                             </Card>
                         </Col>
@@ -135,25 +187,15 @@
             );
         };
 
-        // 1.5 Requirement Pool (需求池) - 保持 V2.1
+        // 1.5 Requirement Pool (需求池)
         const RequirementPool = () => {
-            const columns = [
-                { title: 'ID', dataIndex: 'id', width: 80 },
-                { title: '需求名称', dataIndex: 'title', render: t => <a className="font-bold">{t}</a> },
-                { title: '优先级', dataIndex: 'priority', width: 80, render: p => <Tag color={p==='P0'?'red':p==='P1'?'orange':'blue'}>{p}</Tag> },
-                { title: '来源', dataIndex: 'source', width: 100 },
-                { title: '状态', dataIndex: 'status', width: 100, render: s => <Badge status={s==='待处理'?'default':'processing'} text={s} /> },
-                { title: '负责人', dataIndex: 'owner', width: 100, render: u => <Avatar size="small" style={{backgroundColor:'#87d068'}}>{u[0]}</Avatar> },
-            ];
-            const data = [
-                { key:1, id:'REQ-001', title:'商城首页秒杀模块', priority:'P0', source:'运营会议', status:'进行中', owner:'Alex' },
-                { key:2, id:'REQ-002', title:'微信支付接口升级', priority:'P0', source:'技术债', status:'待处理', owner:'Mike' },
-            ];
+            const [isModalVisible, setIsModalVisible] = useState(false);
+            const [form] = Form.useForm();
+            const columns = [{ title: 'ID', dataIndex: 'id', width: 80 }, { title: '名称', dataIndex: 'title', render: t => <a className="font-bold">{t}</a> }, { title: '优先级', dataIndex: 'priority', width: 80, render: p => <Tag color={p==='P0'?'red':'blue'}>{p}</Tag> }, { title: '来源', dataIndex: 'source', width: 100 }, { title: '状态', dataIndex: 'status', width: 100, render: s => <Badge status={s==='待处理'?'default':'processing'} text={s} /> }, { title: '负责人', dataIndex: 'owner', width: 100, render: u => <Avatar size="small" style={{backgroundColor:'#87d068'}}>{u[0]}</Avatar> }];
+            const data = [{ key:1, id:'REQ-001', title:'商城首页秒杀模块', priority:'P0', status:'进行中', owner:'Alex' }, { key:2, id:'REQ-002', title:'微信支付接口升级', priority:'P0', status:'待处理', owner:'Mike' }];
+            const handleOk = () => { form.validateFields().then(values => { message.success('需求提交成功'); setIsModalVisible(false); form.resetFields(); }); };
             return (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>需求池</Breadcrumb.Item></Breadcrumb><Space><Button icon={<UploadOutlined />}>导入</Button><Button type="primary" icon={<PlusOutlined />}>新建需求</Button></Space></div>
-                    <Card className="shadow-sm"><Table columns={columns} dataSource={data} pagination={false} /></Card>
-                </div>
+                <div className="space-y-6 animate-fade-in"><div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>需求池</Breadcrumb.Item></Breadcrumb><Space><Button icon={<UploadOutlined />}>导入</Button><Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>新建需求</Button></Space></div><Card className="shadow-sm"><Table columns={columns} dataSource={data} pagination={false} /></Card><Modal title="新建需求" visible={isModalVisible} onOk={handleOk} onCancel={() => setIsModalVisible(false)}><Form form={form} layout="vertical"><Form.Item name="title" label="需求标题" rules={[{ required: true }]}><Input placeholder="请输入需求标题" /></Form.Item><Row gutter={16}><Col span={12}><Form.Item name="priority" label="优先级"><Select defaultValue="P1"><Option value="P0">P0 - 紧急</Option><Option value="P1">P1 - 重要</Option><Option value="P2">P2 - 一般</Option></Select></Form.Item></Col><Col span={12}><Form.Item name="source" label="需求来源"><Select defaultValue="user"><Option value="user">用户反馈</Option><Option value="internal">内部规划</Option></Select></Form.Item></Col></Row><Form.Item name="desc" label="需求描述"><TextArea rows={4} /></Form.Item></Form></Modal></div>
             )
         }
 
@@ -163,131 +205,58 @@
             const [generatedDoc, setGeneratedDoc] = useState('');
             const [isGenerating, setIsGenerating] = useState(false);
             const [prompt, setPrompt] = useState('请基于以上用户画像数据，撰写一份关于商城用户价格敏感度的调研报告。');
-
-            useEffect(() => {
-                if (chartRef.current) {
-                    const myChart = echarts.init(chartRef.current);
-                    const option = {
-                        tooltip: { trigger: 'item' },
-                        legend: { bottom: '0%', left: 'center' },
-                        series: [{ name: '用户年龄', type: 'pie', radius: ['40%', '70%'], itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 }, label: { show: false }, data: [{ value: 680, name: '25-35岁' }, { value: 200, name: '18-24岁' }, { value: 120, name: '35岁以上' }] }]
-                    };
-                    myChart.setOption(option);
-                }
-            }, []);
-
-            const handleGenerateDoc = () => {
-                setIsGenerating(true);
-                setTimeout(() => {
-                    setGeneratedDoc(`# 商城用户调研报告 V1.0\n\n## 1. 核心洞察\n基于 1000 份有效问卷分析，我们的核心用户群体高度集中在 25-35 岁（占比 68%）。\n\n## 2. 价格敏感度分析\n该群体对价格高度敏感（High Sensitivity）。主要原因为生活成本压力大及比价习惯。\n\n## 3. 建议\n- 推出会员月卡。\n- 增加拼团功能。`);
-                    setIsGenerating(false);
-                    message.success('报告生成成功');
-                }, 1500);
-            };
-
+            useEffect(() => { if (chartRef.current) { const myChart = echarts.init(chartRef.current); myChart.setOption({ tooltip: { trigger: 'item' }, series: [{ name: '年龄', type: 'pie', radius: ['40%', '70%'], data: [{ value: 680, name: '25-35岁' }, { value: 200, name: '18-24岁' }, { value: 120, name: '35岁以上' }] }] }); } }, []);
+            const handleGenerateDoc = () => { setIsGenerating(true); setTimeout(() => { setGeneratedDoc(`# 商城用户调研报告 V1.0\n\n## 1. 核心洞察\n基于 1000 份有效问卷分析，我们的核心用户群体高度集中在 25-35 岁（占比 68%）。\n\n## 2. 价格敏感度分析\n该群体对价格高度敏感（High Sensitivity）。主要原因为生活成本压力大及比价习惯。\n\n## 3. 建议\n- 推出会员月卡。\n- 增加拼团功能。`); setIsGenerating(false); message.success('报告生成成功'); }, 1500); };
             return (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>调研文档</Breadcrumb.Item></Breadcrumb><Button type="primary" icon={<UploadOutlined />}>导入问卷数据</Button></div>
-                    <Row gutter={16}>
-                        <Col span={16}><Card title="用户画像数据" className="shadow-sm"><div className="grid grid-cols-3 gap-4 mb-6"><div className="bg-blue-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-blue-600">68%</div><div className="text-xs text-gray-500">25-35岁</div></div><div className="bg-green-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-green-600">42%</div><div className="text-xs text-gray-500">一线城市</div></div><div className="bg-purple-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-purple-600">High</div><div className="text-xs text-gray-500">价格敏感度</div></div></div><div ref={chartRef} className="h-64 bg-white rounded"></div></Card></Col>
-                        <Col span={8}><Card title="AI 核心洞察" className="shadow-sm h-full" extra={<RobotOutlined className="text-purple-500"/>}><div className="space-y-4"><Alert message="支付流失率高" description="85% 用户因支付页加载慢流失。" type="warning" showIcon /><div className="bg-gray-50 p-3 rounded text-xs text-gray-600"><div className="font-bold mb-1">关键词云：</div><div className="flex flex-wrap gap-2"><Tag>卡顿</Tag><Tag>太贵</Tag><Tag>找不到</Tag></div></div></div></Card></Col>
-                    </Row>
-                    <Card title={<><RobotOutlined className="mr-2 text-indigo-500"/>AI 辅助撰写调研报告</>} className="shadow-sm">
-                        <div className="flex gap-4 mb-4"><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} value={prompt} onChange={e => setPrompt(e.target.value)} className="flex-1" /><Button type="primary" icon={<ThunderboltOutlined />} loading={isGenerating} onClick={handleGenerateDoc} style={{height: 'auto'}}>生成报告</Button></div>
-                        {generatedDoc && <div className="bg-gray-50 p-6 rounded-lg border border-gray-200"><div className="flex justify-between items-center mb-4 border-b pb-2"><h3 className="font-bold text-gray-700 m-0">文档预览</h3><Space><Button size="small" icon={<EyeOutlined />}>全屏</Button><Button size="small" type="primary" icon={<DownloadOutlined />}>下载 PDF</Button></Space></div><div className="prose text-sm text-gray-600 whitespace-pre-line bg-white p-4 border rounded shadow-inner min-h-[150px]">{generatedDoc}</div></div>}
-                    </Card>
-                </div>
+                <div className="space-y-6 animate-fade-in"><div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>调研文档</Breadcrumb.Item></Breadcrumb><Button type="primary" icon={<UploadOutlined />}>导入问卷数据</Button></div><Row gutter={16}><Col span={16}><Card title="用户画像数据" className="shadow-sm"><div className="grid grid-cols-3 gap-4 mb-6"><div className="bg-blue-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-blue-600">68%</div><div className="text-xs text-gray-500">25-35岁</div></div><div className="bg-green-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-green-600">42%</div><div className="text-xs text-gray-500">一线城市</div></div><div className="bg-purple-50 p-4 rounded-lg text-center"><div className="text-2xl font-bold text-purple-600">High</div><div className="text-xs text-gray-500">价格敏感度</div></div></div><div ref={chartRef} className="h-64 bg-white rounded"></div></Card></Col><Col span={8}><Card title="AI 核心洞察" className="shadow-sm h-full" extra={<RobotOutlined className="text-purple-500"/>}><div className="space-y-4"><Alert message="支付流失率高" description="85% 用户因支付页加载慢流失。" type="warning" showIcon /><div className="bg-gray-50 p-3 rounded text-xs text-gray-600"><div className="font-bold mb-1">关键词云：</div><div className="flex flex-wrap gap-2"><Tag>卡顿</Tag><Tag>太贵</Tag><Tag>找不到</Tag></div></div></div></Card></Col></Row><Card title={<><RobotOutlined className="mr-2 text-indigo-500"/>AI 辅助撰写调研报告</>} className="shadow-sm"><div className="flex gap-4 mb-4"><Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} value={prompt} onChange={e => setPrompt(e.target.value)} className="flex-1" /><Button type="primary" icon={<ThunderboltOutlined />} loading={isGenerating} onClick={handleGenerateDoc} style={{height: 'auto'}}>生成报告</Button></div>{generatedDoc && <div className="bg-gray-50 p-6 rounded-lg border border-gray-200"><div className="flex justify-between items-center mb-4 border-b pb-2"><h3 className="font-bold text-gray-700 m-0">文档预览</h3><Space><Button size="small" icon={<EyeOutlined />}>全屏</Button><Button size="small" type="primary" icon={<DownloadOutlined />}>下载 PDF</Button></Space></div><div className="prose text-sm text-gray-600 whitespace-pre-line bg-white p-4 border rounded shadow-inner min-h-[150px]">{generatedDoc}</div></div>}</Card></div>
             );
         };
 
-        // 3. Competitor Analysis (竞品分析)
+        // 3. Competitor Analysis (保持)
         const CompetitorAnalysis = () => {
-            const [inputVal, setInputVal] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [result, setResult] = useState(null);
-            
-            const handleAnalyze = () => {
-                if(!inputVal) return message.warning('请输入竞品名称或链接');
-                setLoading(true);
-                setTimeout(() => { 
-                    setLoading(false); 
-                    setResult({
-                        name: "Competitor X",
-                        swot: {
-                            s: "用户基数大，移动端体验流畅，品牌知名度高",
-                            w: "功能更新迭代慢，缺乏AI智能化功能，价格昂贵",
-                            o: "利用AI差异化竞争，切入中小企业市场",
-                            t: "大厂免费工具入局，价格战风险"
-                        },
-                        matrix: [
-                            { key:1, dim: '核心定位', us: 'AI 自动化', them: '传统管理' },
-                            { key:2, dim: '价格', us: '¥ 199/月', them: '¥ 299/月' },
-                            { key:3, dim: '功能丰富度', us: '高 (8大模块)', them: '中 (5大模块)' }
-                        ]
-                    }); 
-                    message.success('竞品报告已生成'); 
-                }, 1500);
-            };
-
+            const [inputVal, setInputVal] = useState(''); const [loading, setLoading] = useState(false); const [result, setResult] = useState(null);
+            const handleAnalyze = () => { if(!inputVal) return message.warning('请输入竞品名称或链接'); setLoading(true); setTimeout(() => { setLoading(false); setResult({ name: "Competitor X", swot: { s: "用户基数大，移动端体验流畅", w: "功能更新迭代慢，价格昂贵", o: "利用AI差异化竞争", t: "价格战风险" }, matrix: [ { key:1, dim: '核心定位', us: 'AI 自动化', them: '传统管理' }, { key:2, dim: '价格', us: '¥ 199/月', them: '¥ 299/月' } ] }); message.success('竞品报告已生成'); }, 1500); };
             return (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="flex justify-between items-center">
-                        <Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>竞品分析</Breadcrumb.Item></Breadcrumb>
-                        <Button type="primary" icon={<PlusOutlined />}>新建分析</Button>
-                    </div>
-                    <Card className="shadow-sm">
-                        <div className="flex gap-4">
-                            <Input prefix={<SearchOutlined/>} placeholder="输入竞品名称或官网 URL..." value={inputVal} onChange={e=>setInputVal(e.target.value)} />
-                            <Button type="primary" icon={<ThunderboltOutlined/>} loading={loading} onClick={handleAnalyze}>AI 解析</Button>
-                        </div>
-                    </Card>
-                    
-                    {result ? (
-                        <div className="space-y-6 animate-fade-in-up">
-                            <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                <h3 className="text-lg font-bold m-0 flex items-center">
-                                    <Tag color="blue" className="mr-2">报告</Tag> 
-                                    {result.name} 深度分析报告
-                                </h3>
-                                <Space>
-                                    <Button icon={<EditOutlined />}>编辑</Button>
-                                    <Button icon={<EyeOutlined />}>预览</Button>
-                                    <Button type="primary" icon={<DownloadOutlined />}>下载 Word</Button>
-                                </Space>
-                            </div>
-                            <Row gutter={16}>
-                                <Col span={14}>
-                                    <Card title="功能对比矩阵" size="small" className="h-full">
-                                        <Table dataSource={result.matrix} columns={[{title:'维度',dataIndex:'dim', className:'font-bold bg-gray-50'},{title:'我方',dataIndex:'us',render:t=><b className="text-blue-600">{t}</b>},{title:`竞品`,dataIndex:'them'}]} pagination={false} size="middle" bordered />
-                                    </Card>
-                                </Col>
-                                <Col span={10}>
-                                    <Card title="SWOT 分析模型" size="small" className="h-full">
-                                        <div className="grid grid-cols-2 gap-3 h-full">
-                                            <div className="bg-green-50 p-3 text-xs rounded border border-green-100 h-32 overflow-y-auto"><div className="text-green-700 font-bold mb-1">Strengths</div>{result.swot.s}</div>
-                                            <div className="bg-red-50 p-3 text-xs rounded border border-red-100 h-32 overflow-y-auto"><div className="text-red-700 font-bold mb-1">Weaknesses</div>{result.swot.w}</div>
-                                            <div className="bg-blue-50 p-3 text-xs rounded border border-blue-100 h-32 overflow-y-auto"><div className="text-blue-700 font-bold mb-1">Opportunities</div>{result.swot.o}</div>
-                                            <div className="bg-orange-50 p-3 text-xs rounded border border-orange-100 h-32 overflow-y-auto"><div className="text-orange-700 font-bold mb-1">Threats</div>{result.swot.t}</div>
-                                        </div>
-                                    </Card>
-                                </Col>
-                            </Row>
-                        </div>
-                    ) : !loading && <Empty description="暂无报告，请输入竞品信息开始分析" />}
-                </div>
+                <div className="space-y-6 animate-fade-in"><div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>竞品分析</Breadcrumb.Item></Breadcrumb><Button type="primary" icon={<PlusOutlined />}>新建分析</Button></div><Card className="shadow-sm"><div className="flex gap-4"><Input prefix={<SearchOutlined/>} placeholder="输入竞品名称或官网 URL..." value={inputVal} onChange={e=>setInputVal(e.target.value)} /><Button type="primary" icon={<ThunderboltOutlined/>} loading={loading} onClick={handleAnalyze}>AI 解析</Button></div></Card>{result ? <div className="space-y-6 animate-fade-in-up"><div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100"><h3 className="text-lg font-bold m-0 flex items-center"><Tag color="blue" className="mr-2">报告</Tag> {result.name} 深度分析报告</h3><Space><Button icon={<EditOutlined />}>编辑</Button><Button icon={<EyeOutlined />}>预览</Button><Button type="primary" icon={<DownloadOutlined />}>下载 Word</Button></Space></div><Row gutter={16}><Col span={14}><Card title="功能对比矩阵" size="small" className="h-full"><Table dataSource={result.matrix} columns={[{title:'维度',dataIndex:'dim', className:'font-bold bg-gray-50'},{title:'我方',dataIndex:'us',render:t=><b className="text-blue-600">{t}</b>},{title:`竞品`,dataIndex:'them'}]} pagination={false} size="middle" bordered /></Card></Col><Col span={10}><Card title="SWOT 分析模型" size="small" className="h-full"><div className="grid grid-cols-2 gap-3 h-full"><div className="bg-green-50 p-3 text-xs rounded border border-green-100 h-32 overflow-y-auto"><div className="text-green-700 font-bold mb-1">Strengths</div>{result.swot.s}</div><div className="bg-red-50 p-3 text-xs rounded border border-red-100 h-32 overflow-y-auto"><div className="text-red-700 font-bold mb-1">Weaknesses</div>{result.swot.w}</div><div className="bg-blue-50 p-3 text-xs rounded border border-blue-100 h-32 overflow-y-auto"><div className="text-blue-700 font-bold mb-1">Opportunities</div>{result.swot.o}</div><div className="bg-orange-50 p-3 text-xs rounded border border-orange-100 h-32 overflow-y-auto"><div className="text-orange-700 font-bold mb-1">Threats</div>{result.swot.t}</div></div></Card></Col></Row></div> : !loading && <Empty description="暂无报告，请输入竞品信息开始分析" />}</div>
             );
         };
 
-        // 4. Meeting Notes (会议纪要) - 增强版 (含历史记录)
+        // 4. Meeting Notes (会议纪要) - V2.7 按钮文案更新
         const MeetingNotes = () => {
             const [isRecording, setIsRecording] = useState(false);
-            const [notes, setNotes] = useState('');
+            const [transcript, setTranscript] = useState([]);
             const [generatedResult, setGeneratedResult] = useState(null);
             const [generating, setGenerating] = useState(false);
+            const [notes, setNotes] = useState('');
+
+            // V2.4: 模拟对话数据
+            const mockDialogues = [
+                { role: 'PM', name: '产品经理', text: '好了，我们开始。今天主要讨论商城首页的加载速度问题。' },
+                { role: 'Dev', name: '技术负责', text: '我看了一下数据，主要是图片资源太大，加上没有做预加载。' },
+                { role: 'PM', name: '产品经理', text: '那有什么快速的解决方案吗？用户在支付环节流失很严重。' },
+                { role: 'Dev', name: '技术负责', text: '建议上 Redis 缓存，并且把图片全部上 CDN。' },
+                { role: 'PM', name: '产品经理', text: '预算大概多少？需要确认一下。' },
+                { role: 'Dev', name: '技术负责', text: '大概需要增加 2 台服务器，预算在可控范围内。' },
+                { role: 'PM', name: '产品经理', text: 'OK，那就定下来，作为 P0 级需求进下个版本。' }
+            ];
 
             const toggleRecording = () => {
-                setIsRecording(!isRecording);
-                message.info(isRecording ? '录音结束' : '开始录音...');
+                if (!isRecording) {
+                    setIsRecording(true);
+                    setTranscript([]);
+                    let i = 0;
+                    const interval = setInterval(() => {
+                        if (i < mockDialogues.length) {
+                            setTranscript(prev => [...prev, mockDialogues[i]]);
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 1000); 
+                } else {
+                    setIsRecording(false);
+                    message.success('录音结束');
+                }
             };
 
             const handleGenerate = () => {
@@ -295,61 +264,75 @@
                 setTimeout(() => {
                     setGenerating(false);
                     setGeneratedResult({
-                        expanded: "会议讨论了商城首页秒杀模块的交互逻辑。用户反馈支付环节流失率高，决定引入 Redis 缓存优化加载速度。产品经理需确认预算。",
-                        todos: [{ text: "确认服务器预算", owner: "产品经理" }, { text: "输出 Redis 缓存方案", owner: "技术负责人" }],
-                        reqs: [{ title: "首页加载速度优化", priority: "P0", desc: "目标加载 < 1s" }]
+                        expanded: "会议确认首页加载慢是流失主因。技术团队提出 Redis + CDN 方案，预算可控。已确定为 P0 需求。",
+                        todos: [{ text: "服务器采购申请", owner: "技术负责" }, { text: "输出 Redis 缓存方案", owner: "技术负责" }],
+                        reqs: [{ title: "图片资源 CDN 化", priority: "P0", desc: "加载时间 < 1s" }]
                     });
                     message.success('生成完毕');
                 }, 1500);
             };
 
-            // 历史记录数据
-            const historyData = [
-                { key:1, title:'需求评审会-0524', date:'2024-05-24 10:00', duration:'45min', owner:'Alex' },
-                { key:2, title:'技术可行性研讨', date:'2024-05-22 14:30', duration:'60min', owner:'Mike' },
-            ];
+            const historyData = [{ key:1, title:'需求评审会-0524', date:'2024-05-24 10:00', duration:'45min', owner:'Alex' }, { key:2, title:'技术可行性研讨', date:'2024-05-22 14:30', duration:'60min', owner:'Mike' }];
 
             return (
                 <div className="space-y-6 animate-fade-in h-full flex flex-col">
                     <div className="flex justify-between items-center">
                         <Breadcrumb><Breadcrumb.Item>构想中心</Breadcrumb.Item><Breadcrumb.Item>会议纪要</Breadcrumb.Item></Breadcrumb>
-                        <Button type={isRecording ? "danger" : "primary"} icon={isRecording ? <StopOutlined /> : <AudioOutlined />} onClick={toggleRecording} shape="round" size="large">{isRecording ? "结束 (00:15:30)" : "开始会议"}</Button>
+                        <Button type={isRecording ? "danger" : "primary"} icon={isRecording ? <StopOutlined /> : <AudioOutlined />} onClick={toggleRecording} shape="round" size="large">{isRecording ? "结束会议" : "开始会议"}</Button>
                     </div>
                     
-                    <Row gutter={16} className="flex-1">
-                        <Col span={12} className="h-full flex flex-col">
-                            <Card title="实时语音转写" className="shadow-sm" bodyStyle={{height:'300px', overflowY:'auto'}}>
-                                {isRecording ? <div className="space-y-4"><div className="flex gap-3"><Avatar style={{backgroundColor:'#87d068'}}>PM</Avatar><div className="bg-gray-50 p-3 rounded-lg text-sm max-w-[80%]">关于这次的首页改版，重点是提升加载速度。</div></div><div className="flex justify-center py-4"><Spin tip="转写中..." /></div></div> : <div className="flex flex-col items-center justify-center h-full text-gray-400"><AudioOutlined style={{fontSize: 48, marginBottom: 16}} /><p>点击开始会议</p></div>}
-                            </Card>
-                            
-                            <Card title="手写笔记区" className="shadow-sm mt-4 flex-1">
-                                <TextArea rows={6} placeholder="在此记录会议重点关键字，例如：'Redis缓存方案'、'P0优先级'..." value={notes} onChange={e => setNotes(e.target.value)} className="resize-none border-0 bg-yellow-50 focus:bg-white" />
-                                <Button type="primary" block icon={<RobotOutlined />} loading={generating} onClick={handleGenerate} className="mt-4">生成智能纪要</Button>
+                    {/* 上半部分：左右分栏 */}
+                    <Row gutter={16} className="h-96">
+                        <Col span={12} className="h-full">
+                            <Card title="实时语音转写" className="shadow-sm h-full flex flex-col" bodyStyle={{flex:1, overflowY:'auto'}}>
+                                {transcript.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {transcript.map((msg, idx) => (
+                                            <div key={idx} className={`flex gap-3 ${msg.role === 'Dev' ? 'flex-row-reverse' : ''} animate-fade-in-up`}>
+                                                <Avatar style={{backgroundColor: msg.role === 'PM' ? '#87d068' : '#1890ff'}}>{msg.role}</Avatar>
+                                                <div className={`p-3 rounded-lg text-sm max-w-[80%] ${msg.role === 'PM' ? 'bg-gray-50 rounded-tl-none' : 'bg-blue-50 rounded-tr-none'}`}>
+                                                    <div className={`text-xs text-gray-400 mb-1 ${msg.role === 'Dev' ? 'text-right' : ''}`}>{msg.name}</div>
+                                                    {msg.text}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {isRecording && <div className="flex justify-center py-2"><Spin size="small" /></div>}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                        <AudioOutlined style={{fontSize: 48, marginBottom: 16}} /><p>点击开始会议演示实时转写</p>
+                                    </div>
+                                )}
                             </Card>
                         </Col>
                         
-                        <Col span={12} className="h-full flex flex-col">
-                            <Card className="shadow-sm flex-1 overflow-y-auto bg-indigo-50 border-indigo-100" title="智能生成结果">
-                                {generatedResult ? <div className="space-y-4"><div className="bg-white p-4 rounded-lg"><div className="font-bold text-gray-700 mb-2">智能扩写摘要</div><p className="text-sm text-gray-600">{generatedResult.expanded}</p></div><div className="bg-white p-4 rounded-lg"><div className="font-bold text-gray-700 mb-2">待办事项</div>{generatedResult.todos.map((t,i)=><div key={i} className="flex justify-between text-sm bg-gray-50 p-2 rounded mb-1"><span>{t.text}</span><Tag>{t.owner}</Tag></div>)}</div><div className="bg-white p-4 rounded-lg"><div className="flex justify-between font-bold text-gray-700 mb-2"><span>关键需求</span><Button type="link" size="small" icon={<SyncOutlined/>}>同步至需求池</Button></div>{generatedResult.reqs.map((r,i)=><div key={i} className="bg-orange-50 p-2 rounded text-sm"><div className="font-bold text-orange-800">{r.title} <Tag color="red">{r.priority}</Tag></div><div className="text-xs text-orange-600">{r.desc}</div></div>)}</div></div> : <Empty description="点击左侧生成按钮" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                        <Col span={12} className="h-full">
+                            <Card title="手写笔记区" className="shadow-sm h-full flex flex-col" bodyStyle={{display:'flex', flexDirection:'column', height:'100%'}}>
+                                <TextArea rows={6} placeholder="在此记录会议重点关键字..." value={notes} onChange={e => setNotes(e.target.value)} className="resize-none border-0 bg-yellow-50 focus:bg-white flex-1 mb-4" />
+                                <Button type="primary" block icon={<RobotOutlined />} loading={generating} onClick={handleGenerate} size="large">生成智能纪要</Button>
                             </Card>
                         </Col>
                     </Row>
-
-                    {/* 历史记录 */}
+                    
+                    {/* 下半部分：全宽生成结果 */}
+                    <Card title="智能生成结果" className="shadow-sm bg-indigo-50 border-indigo-100">
+                        {generatedResult ? (
+                            <div className="grid grid-cols-3 gap-4 animate-fade-in">
+                                <div className="bg-white p-4 rounded-lg"><div className="font-bold text-gray-700 mb-2">智能扩写摘要</div><p className="text-sm text-gray-600">{generatedResult.expanded}</p></div>
+                                <div className="bg-white p-4 rounded-lg"><div className="font-bold text-gray-700 mb-2">待办事项</div>{generatedResult.todos.map((t,i)=><div key={i} className="flex justify-between text-sm bg-gray-50 p-2 rounded mb-1"><span>{t.text}</span><Tag>{t.owner}</Tag></div>)}</div>
+                                <div className="bg-white p-4 rounded-lg"><div className="flex justify-between font-bold text-gray-700 mb-2"><span>关键需求</span><Button type="link" size="small" icon={<SyncOutlined/>}>一键同步需求池</Button></div>{generatedResult.reqs.map((r,i)=><div key={i} className="bg-orange-50 p-2 rounded text-sm"><div className="font-bold text-orange-800">{r.title} <Tag color="red">{r.priority}</Tag></div><div className="text-xs text-orange-600">{r.desc}</div></div>)}</div>
+                            </div>
+                        ) : <Empty description="点击上方生成按钮" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                    </Card>
+                    
                     <Card title={<><HistoryOutlined className="mr-2"/>历史会议纪要</>} size="small">
-                        <Table dataSource={historyData} pagination={false} size="small" columns={[
-                            { title: '会议主题', dataIndex: 'title', render: t => <a>{t}</a> },
-                            { title: '时间', dataIndex: 'date' },
-                            { title: '时长', dataIndex: 'duration' },
-                            { title: '记录人', dataIndex: 'owner' },
-                            { title: '操作', render: () => <Space><Button type="link" size="small">查看</Button><Button type="link" size="small">下载</Button></Space> }
-                        ]}/>
+                        <Table dataSource={historyData} pagination={false} size="small" columns={[{ title: '会议主题', dataIndex: 'title' }, { title: '时间', dataIndex: 'date' }, { title: '时长', dataIndex: 'duration' }, { title: '记录人', dataIndex: 'owner' }, { title: '操作', render: () => <Space><Button type="link" size="small">查看</Button><Button type="link" size="small">下载</Button></Space> }]}/>
                     </Card>
                 </div>
             );
         };
 
-        // 5. User Journey (用户旅程)
+        // 5. User Journey (保持)
         const UserJourney = () => {
             const journeyTable = [
                 { stage: '发现', action: '搜索商品/点击广告', touch: '搜索框/Banner', emotion: '期待 (4)', pain: '广告过多', opp: '精准推荐' },
@@ -358,111 +341,93 @@
                 { stage: '支付', action: '提交订单/付款', touch: '收银台', emotion: '紧张 (2)', pain: '支付失败', opp: '多种支付方式' },
                 { stage: '履约', action: '收货/评价', touch: '物流页', emotion: '满意 (5)', pain: '物流慢', opp: '实时地图' },
             ];
-
             return (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="flex justify-between items-center">
-                        <Breadcrumb><Breadcrumb.Item>定义中心</Breadcrumb.Item><Breadcrumb.Item>用户旅程 (商城)</Breadcrumb.Item></Breadcrumb>
-                        <Button type="primary" icon={<RobotOutlined />}>AI 优化旅程</Button>
-                    </div>
-                    
-                    <Card title="可视化地图" className="shadow-sm overflow-x-auto">
-                        <Steps current={2} className="mb-12 w-[1000px]">
-                            <Step title="发现" description="首页/搜索" icon={<SearchOutlined />} />
-                            <Step title="浏览" description="商品详情页" icon={<ShopOutlined />} />
-                            <Step title="决策" description="购物车/对比" icon={<ShoppingCartOutlined />} />
-                            <Step title="支付" description="结算/付款" icon={<CreditCardOutlined />} />
-                            <Step title="履约" description="收货/评价" icon={<CheckCircleOutlined />} />
-                        </Steps>
-                        <div className="relative h-64 w-[1000px] border-l border-b border-gray-200 bg-gray-50 rounded-br-lg mb-8">
-                            {/* 泳道示意 */}
-                            <div className="absolute top-0 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">行为</div>
-                            <div className="absolute top-1/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">接触点</div>
-                            <div className="absolute top-2/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">情绪</div>
-                            <div className="absolute top-3/4 w-full h-1/4 flex items-center pl-2 text-xs text-gray-400">痛点/机会</div>
-                            <Tag className="absolute left-[80px] top-[20px]">搜索商品</Tag>
-                            <Tag className="absolute left-[280px] top-[20px]">查看参数</Tag>
-                            <svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none"><path d="M100 150 Q 300 100 500 140 T 700 180 T 900 120" fill="none" stroke="#1890ff" strokeWidth="3" strokeDasharray="5,5" /><circle cx="700" cy="180" r="6" fill="#ff4d4f"/></svg>
-                            <Tooltip title="痛点：支付跳转慢"><div className="absolute left-[660px] top-[200px] bg-red-50 text-red-500 border border-red-200 px-2 py-1 rounded text-xs cursor-pointer shadow-sm">! 支付失败率高</div></Tooltip>
-                        </div>
-                    </Card>
-
-                    <Card title="结构化旅程表" className="shadow-sm">
-                        <Table dataSource={journeyTable} pagination={false} size="middle" bordered columns={[
-                            { title: '阶段', dataIndex: 'stage', width: 80, render: t => <b className="text-indigo-600">{t}</b> },
-                            { title: '用户行为', dataIndex: 'action' },
-                            { title: '接触点', dataIndex: 'touch' },
-                            { title: '情绪评分', dataIndex: 'emotion', render: t => t.includes('2') ? <span className="text-red-500">{t}</span> : t },
-                            { title: '痛点', dataIndex: 'pain', render: t => <Tag color="red">{t}</Tag> },
-                            { title: '机会点', dataIndex: 'opp', render: t => <Tag color="green">{t}</Tag> },
-                        ]} />
-                    </Card>
-                </div>
+                <div className="space-y-6 animate-fade-in"><div className="flex justify-between items-center"><Breadcrumb><Breadcrumb.Item>定义中心</Breadcrumb.Item><Breadcrumb.Item>用户旅程 (商城)</Breadcrumb.Item></Breadcrumb><Button type="primary" icon={<RobotOutlined />}>AI 优化旅程</Button></div><Card title="可视化地图" className="shadow-sm overflow-x-auto"><Steps current={2} className="mb-12 w-[1000px]"><Step title="发现" description="首页/搜索" icon={<SearchOutlined />} /><Step title="浏览" description="商品详情页" icon={<ShopOutlined />} /><Step title="决策" description="购物车/对比" icon={<ShoppingCartOutlined />} /><Step title="支付" description="结算/付款" icon={<CreditCardOutlined />} /><Step title="履约" description="收货/评价" icon={<CheckCircleOutlined />} /></Steps><div className="relative h-64 w-[1000px] border-l border-b border-gray-200 bg-gray-50 rounded-br-lg mb-8"><div className="absolute top-0 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">行为</div><div className="absolute top-1/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">接触点</div><div className="absolute top-2/4 w-full h-1/4 border-b border-dashed border-gray-300 flex items-center pl-2 text-xs text-gray-400">情绪</div><div className="absolute top-3/4 w-full h-1/4 flex items-center pl-2 text-xs text-gray-400">痛点/机会</div><Tag className="absolute left-[80px] top-[20px]">搜索商品</Tag><Tag className="absolute left-[280px] top-[20px]">查看参数</Tag><svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none"><path d="M100 150 Q 300 100 500 140 T 700 180 T 900 120" fill="none" stroke="#1890ff" strokeWidth="3" strokeDasharray="5,5" /><circle cx="700" cy="180" r="6" fill="#ff4d4f"/></svg><Tooltip title="痛点：支付跳转慢"><div className="absolute left-[660px] top-[200px] bg-red-50 text-red-500 border border-red-200 px-2 py-1 rounded text-xs cursor-pointer shadow-sm">! 支付失败率高</div></Tooltip></div></Card><Card title="结构化旅程表" className="shadow-sm"><Table dataSource={journeyTable} pagination={false} size="middle" bordered columns={[{ title: '阶段', dataIndex: 'stage', width: 80, render: t => <b className="text-indigo-600">{t}</b> }, { title: '用户行为', dataIndex: 'action' }, { title: '接触点', dataIndex: 'touch' }, { title: '情绪评分', dataIndex: 'emotion', render: t => t.includes('2') ? <span className="text-red-500">{t}</span> : t }, { title: '痛点', dataIndex: 'pain', render: t => <Tag color="red">{t}</Tag> }, { title: '机会点', dataIndex: 'opp', render: t => <Tag color="green">{t}</Tag> }]} /></Card></div>
             );
         };
 
-        // 6. Three Diagrams Generator (三图一表) - 深度结构化版
+        // 6. Three Diagrams Generator (三图一表) - V2.4 升级版 (真实可视化示例)
         const ThreeDiagramsGenerator = () => {
             const [activeTab, setActiveTab] = useState('1');
-            
-            // 通用组件：生成器控制器
-            const GeneratorControls = ({ type, placeholder, onGenerate }) => {
-                const [loading, setLoading] = useState(false);
-                const [prompt, setPrompt] = useState('');
-                const [result, setResult] = useState(null);
+            const [generated, setGenerated] = useState(false);
+            const [loading, setLoading] = useState(false);
+            const [prompt, setPrompt] = useState("用户在商品详情页点击立即购买，检查登录状态。若未登录则跳转登录页；若已登录则跳转确认订单页，检查库存，有货则生成订单并支付，无货则提示。");
 
-                const run = () => {
-                    setLoading(true);
-                    setTimeout(() => { 
-                        setLoading(false); 
-                        setResult(true); 
-                        if(onGenerate) onGenerate();
-                        message.success(`${type} 生成成功`); 
-                    }, 1500);
-                };
-
-                return (
-                    <div className="flex flex-col h-full">
-                        <div className="mb-4 bg-gray-50 p-4 rounded border border-gray-200">
-                            <div className="font-bold text-gray-700 mb-2 flex items-center"><RobotOutlined className="mr-2"/>AI 制作助手</div>
-                            <TextArea rows={3} placeholder={placeholder} value={prompt} onChange={e=>setPrompt(e.target.value)} className="mb-3 bg-white" />
-                            <Space>
-                                <Button type="primary" icon={<ThunderboltOutlined/>} loading={loading} onClick={run}>一键生成</Button>
-                                <Button icon={<EditOutlined/>} disabled={!result}>修改</Button>
-                                <Button icon={<EyeOutlined/>} disabled={!result}>预览</Button>
-                                <Button icon={<DownloadOutlined/>} disabled={!result}>下载</Button>
-                            </Space>
-                        </div>
-                        <div className="flex-1 border rounded bg-white p-4 overflow-auto relative">
-                            {!result && <div className="absolute inset-0 flex items-center justify-center text-gray-400">等待生成...</div>}
-                            {result && <div className="animate-fade-in">{type === '核心功能表' ? <MallFuncTable /> : <DiagramPlaceholder type={type} />}</div>}
-                        </div>
-                    </div>
-                );
+            const handleGenerate = () => {
+                setLoading(true);
+                setTimeout(() => { setLoading(false); setGenerated(true); message.success('生成成功'); }, 1500);
             };
 
+            // V2.4: 核心功能表数据
             const MallFuncTable = () => (
-                <Table dataSource={[
-                    { key:1, m:'用户中心', f:'账号注册', d:'手机号验证码', p:'P0' },
-                    { key:2, m:'商品中心', f:'商品搜索', d:'关键字/分类', p:'P0' },
-                    { key:3, m:'交易中心', f:'订单创建', d:'校验库存', p:'P0' },
-                ]} pagination={false} size="small" bordered columns={[{title:'模块',dataIndex:'m'},{title:'功能',dataIndex:'f'},{title:'描述',dataIndex:'d'},{title:'优先级',dataIndex:'p',render:t=><Tag color="red">{t}</Tag>}]} />
+                <Table dataSource={[{key:1,m:'用户中心',f:'账号注册/登录',d:'手机号/微信',p:'P0'},{key:2,m:'商品中心',f:'搜索/详情',d:'SKU展示',p:'P0'},{key:3,m:'订单中心',f:'创建订单',d:'库存校验',p:'P0'}]} pagination={false} size="small" bordered columns={[{title:'模块',dataIndex:'m'},{title:'功能',dataIndex:'f'},{title:'描述',dataIndex:'d'},{title:'优先级',dataIndex:'p',render:t=><Tag color="red">{t}</Tag>}]} />
             );
 
-            const DiagramPlaceholder = ({ type }) => (
-                <div className="flex items-center justify-center h-64 bg-gray-50 border border-dashed rounded">
-                    <div className="text-center">
-                        <AppstoreOutlined style={{fontSize: 40, color: '#1890ff', marginBottom: 16}} />
-                        <div className="text-gray-500 font-bold">{type} 示例 (Mermaid渲染)</div>
-                        <div className="text-xs text-gray-400 mt-2">此处展示 {type} 的可视化图形</div>
+            // V2.4: 业务流程图 (CSS模拟)
+            const VisualFlowchart = () => (
+                <div className="flex flex-col items-center justify-center h-full space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="px-4 py-2 bg-white border rounded-full shadow-sm">开始</div>
+                        <ArrowRightOutlined />
+                        <div className="px-4 py-2 bg-white border rounded shadow-sm">浏览商品</div>
+                        <ArrowRightOutlined />
+                        <div className="px-4 py-2 bg-white border rounded shadow-sm">点击购买</div>
+                    </div>
+                    <div className="h-8 w-px bg-gray-300"></div>
+                    <div className="flex items-center gap-4">
+                        <div className="px-4 py-2 bg-white border rounded shadow-sm">跳转登录</div>
+                        <ArrowRightOutlined className="rotate-180" />
+                        <div className="w-24 h-24 bg-yellow-50 border border-yellow-300 rounded transform rotate-45 flex items-center justify-center"><span className="-rotate-45 font-bold text-xs">已登录?</span></div>
+                        <ArrowRightOutlined />
+                        <div className="px-4 py-2 bg-white border rounded shadow-sm">生成订单</div>
                     </div>
                 </div>
             );
 
-            const historyData = [
-                { key:1, type:'业务流程图', desc:'商城下单流程', time:'2024-05-28 10:00', status:'成功' },
-                { key:2, type:'核心功能表', desc:'V1.0 功能清单', time:'2024-05-27 15:30', status:'成功' },
-            ];
+            // V2.4: 功能结构图 (CSS模拟)
+            const VisualStructure = () => (
+                <div className="flex flex-col items-center justify-center h-full pt-4">
+                    <Tag color="purple" className="text-lg py-1 px-4 mb-4">商城系统</Tag>
+                    <div className="flex gap-8 border-t pt-4 border-gray-300">
+                        <div className="flex flex-col items-center gap-2"><Tag>前台 (APP/H5)</Tag><div className="flex gap-1"><span className="text-xs bg-gray-100 px-1 rounded">首页</span><span className="text-xs bg-gray-100 px-1 rounded">购物车</span></div></div>
+                        <div className="flex flex-col items-center gap-2"><Tag>中台 (业务)</Tag><div className="flex gap-1"><span className="text-xs bg-gray-100 px-1 rounded">用户</span><span className="text-xs bg-gray-100 px-1 rounded">订单</span><span className="text-xs bg-gray-100 px-1 rounded">支付</span></div></div>
+                        <div className="flex flex-col items-center gap-2"><Tag>后台 (管理)</Tag><div className="flex gap-1"><span className="text-xs bg-gray-100 px-1 rounded">商品</span><span className="text-xs bg-gray-100 px-1 rounded">财务</span></div></div>
+                    </div>
+                </div>
+            );
+
+            // V2.4: 页面流程图 (CSS模拟)
+            const VisualPageFlow = () => (
+                <div className="flex justify-center items-center h-full gap-4">
+                    <Card size="small" title="商品详情页" className="w-32"><div className="h-10 bg-gray-100 mb-1"></div><Button size="small" type="primary" block>购买</Button></Card>
+                    <ArrowRightOutlined />
+                    <Card size="small" title="确认订单页" className="w-32 border-blue-500"><div className="h-10 bg-gray-100 mb-1"></div><Button size="small" type="primary" block>提交</Button></Card>
+                    <ArrowRightOutlined />
+                    <Card size="small" title="收银台" className="w-32"><div className="h-10 bg-gray-100 mb-1"></div><Button size="small" type="primary" block>支付</Button></Card>
+                </div>
+            );
+
+            const historyData = [{ key:1, type:'业务流程图', desc:'商城下单流程', time:'2024-05-28 10:00', status:'成功' }, { key:2, type:'核心功能表', desc:'V1.0 功能清单', time:'2024-05-27 15:30', status:'成功' }];
+
+            // 通用控制器
+            const GeneratorControls = ({ type, placeholder, visualComponent }) => (
+                <div className="flex flex-col h-full">
+                    <div className="mb-4 bg-gray-50 p-4 rounded border border-gray-200">
+                        <div className="font-bold text-gray-700 mb-2 flex items-center"><RobotOutlined className="mr-2"/>AI 制作助手</div>
+                        <TextArea rows={3} placeholder={placeholder} value={prompt} onChange={e=>setPrompt(e.target.value)} className="mb-3 bg-white" />
+                        <Space>
+                            <Button type="primary" icon={<ThunderboltOutlined/>} loading={loading} onClick={handleGenerate}>一键生成</Button>
+                            <Button icon={<EditOutlined/>} disabled={!generated}>修改</Button>
+                            <Button icon={<EyeOutlined/>} disabled={!generated}>预览</Button>
+                            <Button icon={<DownloadOutlined/>} disabled={!generated}>下载</Button>
+                        </Space>
+                    </div>
+                    <div className="flex-1 border rounded bg-white p-4 overflow-auto relative">
+                        {!generated && <div className="absolute inset-0 flex items-center justify-center text-gray-400">等待生成...</div>}
+                        {generated && <div className="animate-fade-in h-full">{visualComponent}</div>}
+                    </div>
+                </div>
+            );
 
             return (
                 <div className="h-full flex flex-col space-y-6">
@@ -471,16 +436,16 @@
                     <Card className="shadow-sm flex-1" bodyStyle={{height:'100%', display:'flex', flexDirection:'column'}}>
                         <Tabs activeKey={activeTab} onChange={setActiveTab} type="card" className="flex-1">
                             <TabPane tab={<span><TableOutlined />核心功能表</span>} key="1" className="h-full">
-                                <GeneratorControls type="核心功能表" placeholder="描述商城系统的核心模块，例如：包含用户注册、商品搜索、购物车、订单支付..." />
+                                <GeneratorControls type="核心功能表" placeholder="描述商城系统的核心模块，例如：包含用户注册、商品搜索、购物车、订单支付..." visualComponent={<MallFuncTable/>} />
                             </TabPane>
                             <TabPane tab={<span><RetweetOutlined />业务流程图</span>} key="2" className="h-full">
-                                <GeneratorControls type="业务流程图" placeholder="描述用户下单的流转逻辑，例如：开始 -> 浏览商品 -> 加入购物车 -> 结算 -> 支付 -> 结束" />
+                                <GeneratorControls type="业务流程图" placeholder="描述用户下单的流转逻辑，例如：开始 -> 浏览商品 -> 加入购物车 -> 结算 -> 支付 -> 结束" visualComponent={<VisualFlowchart/>} />
                             </TabPane>
                             <TabPane tab={<span><AppstoreOutlined />功能结构图</span>} key="3" className="h-full">
-                                <GeneratorControls type="功能结构图" placeholder="描述系统的层级结构，例如：商城系统包含前台（首页、详情）和后台（商品管理、订单管理）" />
+                                <GeneratorControls type="功能结构图" placeholder="描述系统的层级结构，例如：商城系统包含前台（首页、详情）和后台（商品管理、订单管理）" visualComponent={<VisualStructure/>} />
                             </TabPane>
                             <TabPane tab={<span><PartitionOutlined />页面流程图</span>} key="4" className="h-full">
-                                <GeneratorControls type="页面流程图" placeholder="描述页面跳转关系，例如：首页 -> 点击商品 -> 详情页 -> 点击购买 -> 确认页" />
+                                <GeneratorControls type="页面流程图" placeholder="描述页面跳转关系，例如：首页 -> 点击商品 -> 详情页 -> 点击购买 -> 确认页" visualComponent={<VisualPageFlow/>} />
                             </TabPane>
                         </Tabs>
                     </Card>
@@ -497,83 +462,212 @@
             );
         };
 
-        // 7. Intelligent PRD (智能 PRD - 商城版 + 历史记录)
+        // 7. Intelligent PRD (保持)
         const IntelligentPRD = () => {
             const [isModalVisible, setIsModalVisible] = useState(false);
-            
-            const historyData = [
-                { key:1, ver:'V1.2', desc:'新增秒杀模块', editor:'Alex', time:'2024-05-28' },
-                { key:2, ver:'V1.1', desc:'优化支付流程', editor:'Mike', time:'2024-05-25' },
-                { key:3, ver:'V1.0', desc:'初始版本', editor:'Alex', time:'2024-05-20' },
-            ];
-
+            const historyData = [{ key:1, ver:'V1.2', desc:'新增秒杀模块', editor:'Alex', time:'2024-05-28' }, { key:2, ver:'V1.1', desc:'优化支付流程', editor:'Mike', time:'2024-05-25' }];
             return (
                 <div className="h-full flex flex-col space-y-6">
                     <Card className="flex-1 shadow-sm" bodyStyle={{padding:0, display:'flex', flexDirection:'column', height:'600px'}}>
-                        {/* Toolbar */}
-                        <div className="border-b p-3 flex items-center gap-2 bg-gray-50 rounded-t-lg">
-                            <Button type="text" icon={<MenuUnfoldOutlined />} />
-                            <Divider type="vertical" />
-                            <Button size="small">H1</Button><Button size="small">H2</Button><Button size="small" icon={<BoldOutlined />} />
-                            <Divider type="vertical" />
-                            <Button type="primary" ghost size="small" icon={<RobotOutlined />}>AI 续写</Button>
-                            <div className="flex-1"></div>
-                            <Tag color="blue">自动保存 14:23</Tag>
-                            <Button type="primary" icon={<ExportOutlined />} onClick={()=>setIsModalVisible(true)}>导出</Button>
-                        </div>
-                        
-                        <div className="flex-1 flex overflow-hidden">
-                            <div className="w-64 border-r p-4 bg-gray-50 hidden md:block overflow-y-auto">
-                                <h4 className="font-bold text-gray-600 mb-4 text-xs uppercase">文档大纲</h4>
-                                <Steps direction="vertical" size="small" current={1}>
-                                    <Step title="1. 项目背景" status="finish" />
-                                    <Step title="2. 核心流程" status="process" />
-                                    <Step title="3. 功能详述 (商城)" status="wait" />
-                                    <Step title="4. 数据埋点" status="wait" />
-                                </Steps>
-                            </div>
-                            <div className="flex-1 p-8 overflow-y-auto w-full">
-                                <h1 className="text-4xl font-bold mb-6 text-gray-800">商城系统重构 PRD V1.2</h1>
-                                <div className="mb-8 hover:bg-blue-50 p-2 rounded transition-colors cursor-text group relative">
-                                    <h2 className="text-2xl font-bold mb-4 border-l-4 border-indigo-500 pl-3">1. 项目背景</h2>
-                                    <p className="text-gray-600 leading-relaxed">当前商城系统架构老旧，无法支撑即将到来的 618 大促流量。本次重构旨在引入微服务架构，优化用户下单体验，提升转化率。</p>
-                                    <div className="absolute right-2 top-2 hidden group-hover:block"><Button size="small" icon={<RobotOutlined />} type="primary">优化文案</Button></div>
-                                </div>
-                                <div className="mb-8 p-4 border rounded-lg bg-gray-50">
-                                    <h3 className="font-bold mb-2 flex items-center"><RetweetOutlined className="mr-2"/> 2. 核心下单流程</h3>
-                                    <div className="bg-white p-4 border rounded shadow-sm text-center text-gray-400 flex justify-center"><div className="flex items-center gap-2"><Tag>购物车</Tag><ArrowRightOutlined/><Tag>确认订单</Tag><ArrowRightOutlined/><Tag>收银台</Tag><ArrowRightOutlined/><Tag color="green">支付成功</Tag></div></div>
-                                </div>
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-bold mb-4 border-l-4 border-indigo-500 pl-3">3. 功能详述</h2>
-                                    <Table dataSource={[{key:1,f:'秒杀倒计时',r:'精确到毫秒，同步服务器时间'},{key:2,f:'优惠券叠加',r:'支持满减券与折扣券叠加使用'}]} columns={[{title:'功能点',dataIndex:'f',width:150},{title:'需求描述',dataIndex:'r'}]} pagination={false} size="small" bordered />
-                                </div>
-                            </div>
-                        </div>
+                        <div className="border-b p-3 flex items-center gap-2 bg-gray-50 rounded-t-lg"><Button type="text" icon={<MenuUnfoldOutlined />} /><Divider type="vertical" /><Button size="small">H1</Button><Button size="small">H2</Button><Button size="small" icon={<BoldOutlined />} /><Divider type="vertical" /><Button type="primary" ghost size="small" icon={<RobotOutlined />}>AI 续写</Button><div className="flex-1"></div><Tag color="blue">自动保存 14:23</Tag><Button type="primary" icon={<ExportOutlined />} onClick={()=>setIsModalVisible(true)}>导出</Button></div>
+                        <div className="flex-1 flex overflow-hidden"><div className="w-64 border-r p-4 bg-gray-50 hidden md:block overflow-y-auto"><h4 className="font-bold text-gray-600 mb-4 text-xs uppercase">文档大纲</h4><Steps direction="vertical" size="small" current={1}><Step title="1. 项目背景" status="finish" /><Step title="2. 核心流程" status="process" /><Step title="3. 功能详述 (商城)" status="wait" /><Step title="4. 数据埋点" status="wait" /></Steps></div><div className="flex-1 p-8 overflow-y-auto w-full"><h1 className="text-4xl font-bold mb-6 text-gray-800">商城系统重构 PRD V1.2</h1><div className="mb-8 hover:bg-blue-50 p-2 rounded transition-colors cursor-text group relative"><h2 className="text-2xl font-bold mb-4 border-l-4 border-indigo-500 pl-3">1. 项目背景</h2><p className="text-gray-600 leading-relaxed">当前商城系统架构老旧，无法支撑即将到来的 618 大促流量。本次重构旨在引入微服务架构，优化用户下单体验，提升转化率。</p><div className="absolute right-2 top-2 hidden group-hover:block"><Button size="small" icon={<RobotOutlined />} type="primary">优化文案</Button></div></div><div className="mb-8 p-4 border rounded-lg bg-gray-50"><h3 className="font-bold mb-2 flex items-center"><RetweetOutlined className="mr-2"/> 2. 核心下单流程</h3><div className="bg-white p-4 border rounded shadow-sm text-center text-gray-400 flex justify-center"><div className="flex items-center gap-2"><Tag>购物车</Tag><ArrowRightOutlined/><Tag>确认订单</Tag><ArrowRightOutlined/><Tag>收银台</Tag><ArrowRightOutlined/><Tag color="green">支付成功</Tag></div></div></div><div className="mb-8"><h2 className="text-2xl font-bold mb-4 border-l-4 border-indigo-500 pl-3">3. 功能详述</h2><Table dataSource={[{key:1,f:'秒杀倒计时',r:'精确到毫秒，同步服务器时间'},{key:2,f:'优惠券叠加',r:'支持满减券与折扣券叠加使用'}]} columns={[{title:'功能点',dataIndex:'f',width:150},{title:'需求描述',dataIndex:'r'}]} pagination={false} size="small" bordered /></div></div></div>
                     </Card>
-
-                    <Card title={<><HistoryOutlined className="mr-2"/>版本历史记录</>} size="small">
-                        <Table dataSource={historyData} pagination={false} size="small" columns={[
-                            { title: '版本号', dataIndex: 'ver', render: t => <Tag color="blue">{t}</Tag> },
-                            { title: '修订说明', dataIndex: 'desc' },
-                            { title: '修改人', dataIndex: 'editor' },
-                            { title: '时间', dataIndex: 'time' },
-                            { title: '操作', render: () => <Space><Button type="link" size="small">查看</Button><Button type="link" size="small">对比</Button></Space> }
-                        ]}/>
-                    </Card>
-
-                    <Modal title="导出文档" visible={isModalVisible} onOk={()=>setIsModalVisible(false)} onCancel={()=>setIsModalVisible(false)} okText="确认导出" cancelText="取消">
-                        <div className="space-y-4"><div><h4 className="mb-2 font-bold">格式：</h4><Checkbox.Group options={['PDF', 'Word', 'HTML']} defaultValue={['PDF']} /></div></div>
-                    </Modal>
+                    <Card title={<><HistoryOutlined className="mr-2"/>版本历史记录</>} size="small"><Table dataSource={historyData} pagination={false} size="small" columns={[{ title: '版本号', dataIndex: 'ver', render: t => <Tag color="blue">{t}</Tag> }, { title: '修订说明', dataIndex: 'desc' }, { title: '修改人', dataIndex: 'editor' }, { title: '时间', dataIndex: 'time' }, { title: '操作', render: () => <Space><Button type="link" size="small">查看</Button><Button type="link" size="small">对比</Button></Space> }]} /></Card>
+                    <Modal title="导出文档" visible={isModalVisible} onOk={()=>setIsModalVisible(false)} onCancel={()=>setIsModalVisible(false)} okText="确认导出" cancelText="取消"><div className="space-y-4"><div><h4 className="mb-2 font-bold">格式：</h4><Checkbox.Group options={['PDF', 'Word', 'HTML']} defaultValue={['PDF']} /></div></div></Modal>
                 </div>
             );
         };
 
-        // 8. Production (制作中心) - 原型(AI生成/编辑) + Demo(双端)
+        // 8. Project Management (项目管理) - V2.6 新增
+        const ProjectManagement = () => {
+            const [selectedProject, setSelectedProject] = useState('mall');
+            
+            // 详细甘特图数据 (计划 vs 实际)
+            // 假设总长度 100% 代表项目全周期
+            const detailedGantt = [
+                { stage: '需求调研', planStart: 0, planWidth: 15, actStart: 0, actWidth: 18, status: 'delay' }, // 延期
+                { stage: 'PRD 评审', planStart: 15, planWidth: 10, actStart: 18, actWidth: 10, status: 'normal' },
+                { stage: 'UI 设计', planStart: 25, planWidth: 20, actStart: 28, actWidth: 15, status: 'advance' }, // 提前
+                { stage: '前端开发', planStart: 45, planWidth: 30, actStart: 45, actWidth: 0, status: 'pending' },
+                { stage: '后端开发', planStart: 45, planWidth: 35, actStart: 45, actWidth: 0, status: 'pending' },
+                { stage: '联调测试', planStart: 80, planWidth: 15, actStart: 80, actWidth: 0, status: 'pending' },
+                { stage: '上线发布', planStart: 95, planWidth: 5, actStart: 95, actWidth: 0, status: 'pending' },
+            ];
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex justify-between items-center">
+                        <Breadcrumb>
+                            <Breadcrumb.Item>PM Nexus</Breadcrumb.Item>
+                            <Breadcrumb.Item>项目管理</Breadcrumb.Item>
+                        </Breadcrumb>
+                        <Select defaultValue="mall" style={{ width: 200 }} onChange={setSelectedProject}>
+                            <Option value="mall">商城网站重构</Option>
+                            <Option value="crm">CRM 客户管理系统</Option>
+                            <Option value="data">大数据中台</Option>
+                        </Select>
+                    </div>
+
+                    <Card title="项目里程碑详情 (计划 vs 实际)" className="shadow-sm">
+                        <div className="mb-4 flex gap-4 text-xs text-gray-500 justify-end">
+                            <div className="flex items-center"><div className="w-3 h-3 bg-gray-300 rounded mr-2"></div>计划时间</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>实际进度 (正常)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-red-400 rounded mr-2"></div>实际进度 (延期)</div>
+                            <div className="flex items-center"><div className="w-3 h-3 bg-green-400 rounded mr-2"></div>实际进度 (提前)</div>
+                        </div>
+
+                        <div className="relative border-t border-gray-100">
+                            {/* 刻度背景 */}
+                            <div className="absolute top-0 bottom-0 left-20 right-0 flex justify-between z-0 pointer-events-none">
+                                {[...Array(10)].map((_, i) => <div key={i} className="w-px h-full bg-gray-50"></div>)}
+                            </div>
+
+                            {detailedGantt.map((item, idx) => (
+                                <div key={idx} className="detail-gantt-row relative z-10">
+                                    <div className="detail-gantt-label text-sm">{item.stage}</div>
+                                    <div className="detail-gantt-chart">
+                                        {/* 计划条 */}
+                                        <Tooltip title={`计划: ${item.planStart}% - ${item.planStart + item.planWidth}%`}>
+                                            <div 
+                                                className="detail-gantt-bar-plan"
+                                                style={{ left: `${item.planStart}%`, width: `${item.planWidth}%` }}
+                                            ></div>
+                                        </Tooltip>
+                                        {/* 实际条 */}
+                                        <Tooltip title={`实际: ${item.actStart}%`}>
+                                            <div 
+                                                className={`detail-gantt-bar-actual ${item.status === 'delay' ? 'bg-red-400' : item.status === 'advance' ? 'bg-green-400' : item.actWidth === 0 ? 'bg-gray-100' : 'bg-blue-500'}`}
+                                                style={{ left: `${item.actStart}%`, width: `${item.actWidth > 0 ? item.actWidth : 2}%`, opacity: item.actWidth === 0 ? 0.5 : 1 }}
+                                            ></div>
+                                        </Tooltip>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Card title="风险登记册" size="small">
+                                <Table 
+                                    dataSource={[
+                                        { key: 1, risk: '支付接口文档缺失', level: '高', owner: 'Mike', status: '处理中' },
+                                        { key: 2, risk: '设计师人力不足', level: '中', owner: 'Sarah', status: '待协调' },
+                                    ]}
+                                    columns={[
+                                        { title: '风险项', dataIndex: 'risk' },
+                                        { title: '等级', dataIndex: 'level', render: t => <Tag color={t==='高'?'red':'orange'}>{t}</Tag> },
+                                        { title: '负责人', dataIndex: 'owner' },
+                                        { title: '状态', dataIndex: 'status' }
+                                    ]}
+                                    pagination={false}
+                                    size="small"
+                                />
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card title="资源投入概览" size="small">
+                                <div className="flex justify-around items-center h-32">
+                                    <div className="text-center"><Progress type="circle" percent={75} width={80} /><div className="mt-2 text-xs">开发资源</div></div>
+                                    <div className="text-center"><Progress type="circle" percent={40} width={80} strokeColor="#52c41a" /><div className="mt-2 text-xs">测试资源</div></div>
+                                    <div className="text-center"><Progress type="circle" percent={90} width={80} strokeColor="#f5222d" /><div className="mt-2 text-xs">设计资源</div></div>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+                </div>
+            );
+        };
+
+        // 10. Resource Library (资源库) - V2.6 新增
+        const ResourceLibrary = () => {
+            const [filterType, setFilterType] = useState('all');
+            
+            const resources = [
+                { key: 1, name: '商城重构_PRD_V1.2.docx', type: 'doc', project: '商城重构', date: '2026-02-15', size: '2.4 MB' },
+                { key: 2, name: '首页视觉稿_Final.fig', type: 'design', project: '商城重构', date: '2026-02-20', size: '45 MB' },
+                { key: 3, name: '需求评审会议纪要.mp3', type: 'media', project: '商城重构', date: '2026-01-10', size: '12 MB' },
+                { key: 4, name: '竞品分析报告_2026.pdf', type: 'doc', project: 'CRM系统', date: '2025-12-05', size: '5.6 MB' },
+                { key: 5, name: '用户旅程地图.png', type: 'image', project: '商城重构', date: '2026-01-20', size: '3.1 MB' },
+                { key: 6, name: '后台管理原型_V2.html', type: 'html', project: '大数据中台', date: '2025-11-30', size: '1.2 MB' },
+            ];
+
+            const getIcon = (type) => {
+                switch(type) {
+                    case 'doc': return <FileTextOutlined className="text-blue-500 text-xl" />;
+                    case 'design': return <BgColorsOutlined className="text-purple-500 text-xl" />;
+                    case 'media': return <AudioOutlined className="text-orange-500 text-xl" />;
+                    case 'image': return <PictureOutlined className="text-green-500 text-xl" />;
+                    case 'html': return <CodeOutlined className="text-gray-500 text-xl" />;
+                    default: return <FileTextOutlined />;
+                }
+            };
+
+            const filteredData = filterType === 'all' ? resources : resources.filter(r => r.type === filterType);
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    <div className="flex justify-between items-center">
+                        <Breadcrumb>
+                            <Breadcrumb.Item>PM Nexus</Breadcrumb.Item>
+                            <Breadcrumb.Item>资源库</Breadcrumb.Item>
+                        </Breadcrumb>
+                        <Input.Search placeholder="搜索文件名..." style={{ width: 250 }} />
+                    </div>
+
+                    <Card className="shadow-sm">
+                        <Tabs defaultActiveKey="all" onChange={setFilterType}>
+                            <TabPane tab={<span><FolderOpenOutlined />全部</span>} key="all" />
+                            <TabPane tab={<span><FileTextOutlined />文档</span>} key="doc" />
+                            <TabPane tab={<span><BgColorsOutlined />设计稿</span>} key="design" />
+                            <TabPane tab={<span><AudioOutlined />音视频</span>} key="media" />
+                        </Tabs>
+
+                        <List
+                            grid={{ gutter: 16, column: 4 }}
+                            dataSource={filteredData}
+                            renderItem={item => (
+                                <List.Item>
+                                    <Card hoverable className="card-hover-effect" actions={[
+                                        <Tooltip title="预览"><EyeOutlined key="view" /></Tooltip>,
+                                        <Tooltip title="下载"><DownloadOutlined key="download" /></Tooltip>,
+                                        <Tooltip title="详情"><SelectOutlined key="info" /></Tooltip>
+                                    ]}>
+                                        <Card.Meta
+                                            avatar={getIcon(item.type)}
+                                            title={<div className="truncate" title={item.name}>{item.name}</div>}
+                                            description={
+                                                <div className="text-xs text-gray-400 mt-2">
+                                                    <div>项目: {item.project}</div>
+                                                    <div className="flex justify-between mt-1">
+                                                        <span>{item.date}</span>
+                                                        <span>{item.size}</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        />
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                    </Card>
+                </div>
+            );
+        };
+
+        // 8. Production (制作中心) - V2.5 升级版 (内容丰富 + 模拟编辑器)
         const ProductionCenter = ({ mode }) => {
             const [prompt, setPrompt] = useState('生成一个商城首页，包含顶部搜索栏、轮播图、商品列表和底部导航。');
             const [generating, setGenerating] = useState(false);
             const [generated, setGenerated] = useState(false);
-            const [demoType, setDemoType] = useState('app'); // 'app' or 'web'
+            const [demoType, setDemoType] = useState('web'); // 3. 默认 web
+            const [isPlaying, setIsPlaying] = useState(false);
+
+            // 4. 动画播放逻辑
+            const togglePlay = () => {
+                setIsPlaying(!isPlaying);
+                if(!isPlaying) message.success('开始演示自动交互...');
+            };
 
             const handleGenerate = () => {
                 setGenerating(true);
@@ -582,48 +676,66 @@
 
             if (mode === 'demo') {
                 return (
-                    <div className="h-full flex flex-col animate-fade-in">
+                    <div className="h-full flex flex-col items-center animate-fade-in py-4">
                         <div className="flex justify-center mb-6">
-                            <Radio.Group value={demoType} onChange={e => setDemoType(e.target.value)} buttonStyle="solid" size="large">
-                                <Radio.Button value="app"><MobileOutlined className="mr-2"/>App 端演示</Radio.Button>
+                            <Radio.Group value={demoType} onChange={e => {setDemoType(e.target.value); setIsPlaying(false);}} buttonStyle="solid" size="large">
                                 <Radio.Button value="web"><LaptopOutlined className="mr-2"/>Web 端演示</Radio.Button>
+                                <Radio.Button value="app"><MobileOutlined className="mr-2"/>App 端演示</Radio.Button>
                             </Radio.Group>
                         </div>
 
                         {demoType === 'app' ? (
-                            <div className="flex-1 flex flex-col items-center overflow-y-auto">
+                            <div className="flex-1 flex flex-col items-center overflow-hidden w-full relative">
+                                {/* 3. App端加长版 */}
                                 <div className="iphone-mockup shadow-2xl scale-90 origin-top">
                                     <div className="iphone-notch"></div>
-                                    <div className="h-full w-full bg-gray-50 pt-10 overflow-y-auto scrollbar-hide">
-                                        <div className="p-4 space-y-4">
+                                    <div className="h-full w-full bg-gray-50 pt-10 overflow-hidden relative">
+                                        {/* 4. 滚动动画容器 */}
+                                        <div className={`p-4 space-y-4 ${isPlaying ? 'animate-scroll-content' : ''}`}>
                                             <div className="h-10 bg-white rounded-full shadow-sm flex items-center px-4 text-gray-400 text-xs"><SearchOutlined className="mr-2"/>搜索好物</div>
-                                            <div className="h-40 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center text-white font-bold">618 大促</div>
+                                            <div className="h-40 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center text-white font-bold text-xl">618 超级大促</div>
                                             <div className="grid grid-cols-4 gap-2">
-                                                {[1,2,3,4].map(i=><div key={i} className="flex flex-col items-center"><div className="w-10 h-10 rounded-full bg-yellow-100 mb-1"></div><div className="w-8 h-2 bg-gray-200 rounded"></div></div>)}
+                                                {[1,2,3,4,5,6,7,8].map(i=><div key={i} className="flex flex-col items-center"><div className="w-12 h-12 rounded-full bg-yellow-100 mb-1"></div><div className="w-8 h-2 bg-gray-200 rounded"></div></div>)}
                                             </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {[1,2,3,4].map(i=><div key={i} className="bg-white rounded-lg p-2 shadow-sm"><div className="h-24 bg-gray-100 rounded mb-2"></div><div className="w-16 h-3 bg-gray-200 rounded mb-1"></div><div className="w-10 h-3 bg-red-100 rounded"></div></div>)}
+                                            <div className="text-sm font-bold text-gray-700 mt-4">热门推荐</div>
+                                            <div className="grid grid-cols-2 gap-3 pb-20">
+                                                {[1,2,3,4,5,6].map(i=><div key={i} className="bg-white rounded-lg p-2 shadow-sm"><div className="h-32 bg-gray-100 rounded mb-2"></div><div className="w-20 h-4 bg-gray-200 rounded mb-1"></div><div className="w-12 h-4 bg-red-100 rounded text-xs text-red-500 flex items-center justify-center">¥99</div></div>)}
                                             </div>
+                                        </div>
+                                        {/* 底部导航覆盖 */}
+                                        <div className="absolute bottom-0 left-0 w-full h-16 bg-white/90 backdrop-blur border-t flex justify-around items-center text-2xl text-gray-400 z-10 pb-4">
+                                            <div className="text-blue-500"><ShopOutlined/></div><div><CompassOutlined/></div><div><ShoppingCartOutlined/></div><div><UserOutlined/></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 px-12">
-                                <div className="browser-mockup shadow-2xl h-[500px]">
+                            <div className="flex-1 px-12 w-full max-w-6xl overflow-hidden flex flex-col items-center">
+                                {/* V2.5: Web 端模拟器优化 (等比缩放 1440px 宽) */}
+                                <div className="browser-mockup shadow-2xl w-full h-full relative">
                                     <div className="browser-header">
                                         <div className="flex gap-2"><div className="browser-dot bg-red-400"></div><div className="browser-dot bg-yellow-400"></div><div className="browser-dot bg-green-400"></div></div>
                                         <div className="flex-1 bg-white h-6 rounded px-4 text-xs flex items-center text-gray-400 ml-4">https://www.mall-demo.com</div>
                                     </div>
-                                    <div className="flex-1 bg-gray-50 p-8 overflow-y-auto">
-                                        <div className="max-w-4xl mx-auto">
-                                            <div className="flex justify-between items-center mb-8">
-                                                <div className="font-bold text-xl text-indigo-600">MALL</div>
-                                                <div className="flex gap-6 text-sm font-medium"><span>首页</span><span>分类</span><span>购物车</span><span>我的</span></div>
+                                    <div className="flex-1 bg-gray-50 overflow-hidden relative w-full">
+                                        {/* 内容容器：使用 transform scale 实现等比缩放 */}
+                                        <div className={`web-content-scale-wrapper origin-top-left ${isPlaying ? 'animate-scroll-content' : ''}`} style={{ transform: 'scale(0.8)', width: '125%', height: '125%' }}> 
+                                            <div className="w-full bg-white shadow-sm h-16 flex items-center px-12 justify-between">
+                                                <div className="font-bold text-2xl text-indigo-600">NEXUS MALL</div>
+                                                <div className="flex gap-8 text-base font-medium text-gray-600"><span>首页</span><span>数码</span><span>服饰</span><span>生鲜</span><span>企业购</span></div>
+                                                <div className="flex gap-4"><Button type="primary">登录</Button><Button>注册</Button></div>
                                             </div>
-                                            <div className="h-64 bg-indigo-100 rounded-xl mb-8 flex items-center justify-center text-3xl font-bold text-indigo-300">Web Banner</div>
-                                            <div className="grid grid-cols-4 gap-6">
-                                                {[1,2,3,4].map(i=><div key={i} className="h-48 bg-white rounded-lg shadow-sm"></div>)}
+                                            <div className="p-12">
+                                                <div className="h-96 bg-indigo-600 rounded-2xl mb-12 flex items-center justify-center text-6xl font-bold text-white shadow-lg">年中盛典 5折起</div>
+                                                <div className="text-2xl font-bold mb-6 text-gray-800">热门分类</div>
+                                                <div className="grid grid-cols-6 gap-6 mb-12">
+                                                    {[1,2,3,4,5,6].map(i=><div key={i} className="h-32 bg-white rounded-xl shadow-sm hover:shadow-md flex flex-col items-center justify-center"><div className="w-12 h-12 bg-blue-100 rounded-full mb-2"></div><span className="text-gray-600">分类{i}</span></div>)}
+                                                </div>
+                                                <div className="text-2xl font-bold mb-6 text-gray-800">猜你喜欢</div>
+                                                <div className="grid grid-cols-4 gap-8 mb-12">
+                                                    {[1,2,3,4,5,6,7,8].map(i=><div key={i} className="h-80 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all p-4"><div className="h-48 bg-gray-100 rounded-lg mb-4"></div><div className="h-6 w-3/4 bg-gray-200 rounded mb-2"></div><div className="h-4 w-1/2 bg-gray-100 rounded mb-4"></div><div className="h-8 w-1/3 bg-red-100 rounded flex items-center justify-center text-red-500 font-bold">¥299</div></div>)}
+                                                </div>
+                                                <div className="h-64 bg-gray-800 rounded-xl flex items-center justify-center text-white">Footer Area</div>
                                             </div>
                                         </div>
                                     </div>
@@ -631,23 +743,25 @@
                             </div>
                         )}
                         
-                        <div className="mt-4 flex justify-center gap-4 py-4 border-t bg-white">
-                            <Button icon={<PlayCircleOutlined />}>播放动画</Button>
+                        <div className="mt-4 flex justify-center gap-4 py-4 border-t bg-white w-full z-20">
+                            <Button type={isPlaying ? 'danger' : 'primary'} icon={isPlaying ? <PauseCircleOutlined /> : <PlayCircleOutlined />} onClick={togglePlay} size="large">
+                                {isPlaying ? '停止演示' : '播放交互动画'}
+                            </Button>
                             <Button icon={<CodeOutlined />}>复制链接</Button>
-                            <Button type="primary" icon={<ExportOutlined />}>导出 HTML</Button>
+                            <Button icon={<ExportOutlined />}>导出 HTML</Button>
                         </div>
                     </div>
                 );
             }
             
-            // Prototype Mode
+            // Prototype Mode (V2.5 丰富内容)
             return (
                 <div className="h-full flex flex-col animate-fade-in">
                     {/* AI 生成栏 */}
                     <div className="mb-4 flex gap-4 bg-white p-4 rounded-lg shadow-sm items-end">
                         <div className="flex-1">
                             <div className="text-xs font-bold text-gray-500 mb-2">AI 原型生成</div>
-                            <Input prefix={<RobotOutlined/>} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="输入描述，例如：登录页，包含手机号、验证码..." />
+                            <Input prefix={<RobotOutlined/>} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="输入描述，例如：后台管理系统，包含左侧导航、数据看板..." />
                         </div>
                         <Button type="primary" loading={generating} onClick={handleGenerate} icon={<ThunderboltOutlined/>}>生成</Button>
                     </div>
@@ -655,35 +769,61 @@
                     <div className="flex-1 flex bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
                         {/* 左侧组件库 */}
                         <div className="w-48 border-r bg-gray-50 p-4">
-                            <div className="font-bold text-gray-500 mb-4 text-xs uppercase">组件库</div>
-                            <div className="space-y-2">{['导航栏', '轮播图', '列表项', '按钮', '输入框', '图标'].map(c => <div key={c} className="p-2 bg-white border rounded text-sm cursor-move hover:border-blue-500 hover:text-blue-500 transition-colors"><BuildOutlined className="mr-2"/>{c}</div>)}</div>
+                            <div className="font-bold text-gray-500 mb-4 text-xs uppercase">基础组件</div>
+                            <div className="space-y-2 mb-6">{['按钮', '输入框', '单选框', '复选框'].map(c => <div key={c} className="p-2 bg-white border rounded text-sm cursor-move hover:border-blue-500 hover:text-blue-500 transition-colors"><BuildOutlined className="mr-2"/>{c}</div>)}</div>
+                            <div className="font-bold text-gray-500 mb-4 text-xs uppercase">高级组件</div>
+                            <div className="space-y-2">{['导航栏', '表格', '图表', '卡片'].map(c => <div key={c} className="p-2 bg-white border rounded text-sm cursor-move hover:border-blue-500 hover:text-blue-500 transition-colors"><AppstoreOutlined className="mr-2"/>{c}</div>)}</div>
                         </div>
-                        {/* 中间画布 */}
+                        
+                        {/* 中间画布 (模拟编辑器) */}
                         <div className="flex-1 bg-gray-100 p-8 flex items-center justify-center overflow-auto relative">
-                            <div className="w-[375px] h-[667px] bg-white shadow-lg relative p-4 transition-all group">
-                                <div className="absolute top-0 left-0 w-full h-6 bg-gray-200 text-[10px] flex items-center justify-between px-2 text-gray-500"><span>9:41</span><span>100%</span></div>
+                            {/* 顶部模拟工具栏 */}
+                            <div className="absolute top-4 left-4 flex gap-2">
+                                <Button size="small" icon={<UndoOutlined/>}/>
+                                <Button size="small" icon={<RedoOutlined/>}/>
+                                <Divider type="vertical"/>
+                                <Button size="small" icon={<CopyOutlined/>}/>
+                                <Button size="small" icon={<ScissorOutlined/>}/>
+                            </div>
+
+                            <div className="w-[800px] h-[600px] bg-white shadow-lg relative transition-all group border border-gray-200">
                                 {generated ? (
-                                    <div className="mt-8 space-y-4 animate-fade-in-up cursor-pointer">
-                                        <div className="h-10 bg-gray-100 rounded border flex items-center px-3 text-gray-400 text-sm hover:border-blue-500"><SearchOutlined className="mr-2"/>搜索商品</div>
-                                        <div className="h-32 bg-blue-100 rounded flex items-center justify-center text-blue-400 hover:border-blue-500 border border-transparent">Banner 轮播</div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div className="h-24 bg-gray-50 rounded border hover:border-blue-500"></div><div className="h-24 bg-gray-50 rounded border hover:border-blue-500"></div>
+                                    <div className="w-full h-full flex animate-fade-in-up">
+                                        {/* 模拟生成的后台系统 */}
+                                        <div className="w-48 bg-slate-800 text-white p-4 flex flex-col gap-4">
+                                            <div className="h-8 bg-slate-700 rounded mb-4"></div>
+                                            {[1,2,3,4,5].map(i=><div key={i} className="h-8 bg-slate-700/50 rounded hover:bg-blue-600 cursor-pointer transition-colors"></div>)}
                                         </div>
-                                        <div className="absolute bottom-0 left-0 w-full h-12 bg-white border-t flex justify-around items-center text-xl text-gray-400">
-                                            <div className="text-blue-500"><ShopOutlined/></div><div><ShoppingCartOutlined/></div><div><UserOutlined/></div>
+                                        <div className="flex-1 flex flex-col bg-gray-50">
+                                            <div className="h-14 bg-white border-b flex items-center justify-end px-4 gap-4 shadow-sm">
+                                                <div className="w-8 h-8 rounded-full bg-gray-200"></div>
+                                                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                                            </div>
+                                            <div className="p-6 overflow-y-auto">
+                                                <div className="h-8 w-32 bg-gray-200 rounded mb-6"></div>
+                                                <div className="grid grid-cols-4 gap-4 mb-6">
+                                                    {[1,2,3,4].map(i=><div key={i} className="h-24 bg-white rounded border shadow-sm p-4"><div className="h-4 w-1/2 bg-gray-100 mb-2"></div><div className="h-8 w-2/3 bg-blue-100"></div></div>)}
+                                                </div>
+                                                <div className="bg-white rounded border h-64 p-4 mb-6"><div className="h-4 w-1/4 bg-gray-100 mb-4"></div><div className="h-48 bg-gray-50 rounded border-dashed border-2 flex items-center justify-center text-gray-400">Chart Area</div></div>
+                                                <div className="bg-white rounded border h-64 p-4"><div className="h-4 w-1/4 bg-gray-100 mb-4"></div><div className="space-y-2">{[1,2,3,4,5].map(i=><div key={i} className="h-8 bg-gray-50 rounded"></div>)}</div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="mt-8 border-2 border-dashed border-blue-300 bg-blue-50 h-32 rounded flex items-center justify-center text-blue-400">拖拽组件或使用 AI 生成</div>
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 m-4 rounded">
+                                        <BuildOutlined style={{fontSize: 48, marginBottom: 16}} />
+                                        <p>从左侧拖拽组件或使用 AI 生成</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
+                        
                         {/* 右侧属性 */}
                         <div className="w-60 border-l bg-white p-4">
                             <div className="flex justify-between items-center mb-4"><div className="font-bold text-gray-500 text-xs uppercase">属性设置</div><Space><Button size="small" icon={<EyeOutlined/>}></Button><Button size="small" icon={<DownloadOutlined/>}></Button></Space></div>
                             <div className="space-y-4">
-                                <div><div className="text-xs mb-1">宽 (Width)</div><Input suffix="px" defaultValue="375" size="small"/></div>
-                                <div><div className="text-xs mb-1">高 (Height)</div><Input suffix="px" defaultValue="667" size="small"/></div>
+                                <div><div className="text-xs mb-1">画布宽</div><Input suffix="px" defaultValue="1440" size="small"/></div>
+                                <div><div className="text-xs mb-1">画布高</div><Input suffix="px" defaultValue="900" size="small"/></div>
                                 <div><div className="text-xs mb-1">背景色</div><div className="flex gap-2"><div className="w-6 h-6 rounded bg-white border cursor-pointer ring-2 ring-blue-200"></div><div className="w-6 h-6 rounded bg-gray-100 border cursor-pointer"></div></div></div>
                                 <Divider />
                                 <Button type="primary" block icon={<SaveOutlined />}>保存原型</Button>
@@ -711,9 +851,13 @@
                     case 'prd': return <IntelligentPRD />;
                     case 'prototype': return <ProductionCenter mode="prototype" />;
                     case 'demo': return <ProductionCenter mode="demo" />;
+                    case 'project_mgmt': return <ProjectManagement />; // New
+                    case 'resource_lib': return <ResourceLibrary />; // New
                     default: return <div className="flex items-center justify-center h-full text-gray-400">模块加载中...</div>;
                 }
             };
+
+            const { SelectOutlined } = icons; // Fix for icon usage in ResourceLibrary
 
             return (
                 <Layout style={{ minHeight: '100vh' }}>
@@ -736,6 +880,8 @@
                                 <Menu.Item key="prototype">产品原型</Menu.Item>
                                 <Menu.Item key="demo">演示 Demo</Menu.Item>
                             </Menu.SubMenu>
+                            <Menu.Item key="project_mgmt" icon={<ScheduleOutlined />}>项目管理</Menu.Item> {/* New */}
+                            <Menu.Item key="resource_lib" icon={<FolderOpenOutlined />}>资源库</Menu.Item> {/* New */}
                         </Menu>
                     </Sider>
                     
